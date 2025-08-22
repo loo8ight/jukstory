@@ -7,8 +7,593 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Chosen Palette: Juk Story Green -->
-    <!-- Application Structure Plan: A single-page, top-down narrative report designed for executive review. It uses a sticky navigation bar for easy access to key sections. The flow is logical: outlining current status & goals, identifying a market opportunity (competitor failure), analyzing benchmarks (competitor comparison), proposing a foundational asset (landing page), presenting a clear, tiered solution (interactive marketing plans), and a timeline. This structure was chosen to build a persuasive argument step-by-step, leading the user from 'why' to 'what' and 'how', making the final proposal a logical conclusion of the analysis. Interactivity is focused on the core decision-making area (comparing plans) to maintain clarity. -->
-    <!-- Visualization & Content Choices: 1. Status & Goals -> Goal: Provide Context -> Presentation: Thematic cards (HTML/CSS) -> Justification: Quick, digestible overview of key business metrics. 2. Competitor Analysis -> Goal: Compare & Justify Strategy -> Viz: Comparison Table + Radar Chart (Chart.js/Canvas) -> Justification: The table provides hard data (price, volume), while the radar chart offers a multi-axial qualitative view of brand positioning. 3. Landing Page -> Goal: Propose Conversion Tool -> Presentation: Text, placeholder images, links -> Justification: Visually demonstrates portfolio and provides rationale for creating a central conversion point. 4. Marketing Plans -> Goal: Present Options & Costs -> Presentation: Interactive Tabs/Tables (HTML/CSS/JS) -> Interaction: User clicks tab to reveal details of each plan -> Justification: Tabs are a standard, intuitive UI pattern for comparing options. The table is responsive, turning into a card view on mobile for better readability. 5. Timeline -> Goal: Show Execution Plan -> Viz: Horizontal Timeline (HTML/CSS Flexbox) -> Justification: A simple visual timeline is the clearest way to present a chronological plan. -->
+    <!-- Application Structure Plan: A single-page, top-down narrative report designed for executive review. It uses a sticky navigation bar for easy access to key sections. The flow is logical: outlining current status & goals, identifying a market opportunity (competitor failure), analyzing benchmarks (competitor comparison), focusing on a specific, timely event (Chuseok), and presenting a clear, tiered solution (interactive marketing plans) with a timeline. This structure was chosen to build a persuasive argument step-by-step, leading the user from 'why' to 'what' and 'how', making the final proposal a logical conclusion of the analysis. Interactivity is focused on the core decision-making area (comparing plans) to maintain clarity. -->
+    <!-- Visualization & Content Choices: 1. Status & Goals -> Goal: Provide Context -> Presentation: Thematic cards (HTML/CSS) -> Justification: Quick, digestible overview of key business metrics. 2. Competitor Analysis -> Goal: Compare & Justify Strategy -> Viz: Comparison Table + Radar Chart (Chart.js/Canvas) -> Justification: The table provides hard data (price, volume), while the radar chart offers a multi-axial qualitative view of brand positioning, showing strengths and weaknesses. 3. Marketing Plans -> Goal: Present Options & Costs -> Presentation: Interactive Tabs/Tables (HTML/CSS/JS) -> Interaction: User clicks tab to reveal details of each plan -> Justification: Tabs are a standard, intuitive UI pattern for comparing options without cluttering the page. The table is now responsive, turning into a card view on mobile for better readability. 4. Timeline -> Goal: Show Execution Plan -> Viz: Horizontal Timeline (HTML/CSS Flexbox) -> Justification: A simple visual timeline is the clearest way to present a chronological plan. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        @font-face {
+            font-family: 'SUIT-Regular';
+            src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_suit@1.0/SUIT-Regular.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+        }
+        :root {
+            --new-size-1: 50px !important;
+            --new-size-2: 40px !important;
+            --new-size-3: 30px !important;
+            --new-size-4: 25px !important;
+            --new-size-5: 18px !important;
+            --new-size-6: 16px !important;
+            --brand-green: #455A21;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'SUIT-Regular', sans-serif;
+            background-color: #F9F9F7;
+            color: #333;
+        }
+        h1, h2, h3 {
+            font-weight: 600;
+        }
+        .h1-size { font-size: var(--new-size-1); }
+        .h2-size { font-size: var(--new-size-2); }
+        .h3-size { font-size: var(--new-size-3); }
+        .h4-size { font-size: var(--new-size-4); }
+        .h5-size { font-size: var(--new-size-5); }
+        .h6-size { font-size: var(--new-size-6); }
+
+        .brand-bg { background-color: var(--brand-green); }
+        .brand-text { color: var(--brand-green); }
+        .brand-border { border-color: var(--brand-green); }
+        
+        .section-title {
+            font-size: var(--new-size-2);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--brand-green);
+            display: inline-block;
+        }
+
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: var(--brand-green);
+            border-bottom: 2px solid var(--brand-green);
+        }
+        .plan-tab {
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        .plan-tab.active, .plan-tab:hover {
+            border-color: var(--brand-green);
+            background-color: #E8EAE3;
+            color: var(--brand-green);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        
+        @media (max-width: 767px) {
+            .responsive-table table, 
+            .responsive-table thead, 
+            .responsive-table tbody, 
+            .responsive-table th, 
+            .responsive-table td, 
+            .responsive-table tr {
+                display: block;
+            }
+
+            .responsive-table thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+
+            .responsive-table tr {
+                border: 1px solid #e5e7eb;
+                margin-bottom: 0.75rem;
+                border-radius: 0.5rem;
+                overflow: hidden;
+                background-color: white;
+            }
+            
+            .responsive-table tfoot tr {
+                border: none;
+                background-color: transparent;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 1rem 0.5rem;
+                border-top: 2px solid #333;
+            }
+
+            .responsive-table td {
+                border: none;
+                border-bottom: 1px solid #f3f4f6;
+                position: relative;
+                padding-left: 50%;
+                text-align: right;
+                padding-top: 0.75rem;
+                padding-bottom: 0.75rem;
+                padding-right: 1rem;
+                min-height: 3rem;
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+            }
+
+            .responsive-table td:before {
+                position: absolute;
+                top: 50%;
+                left: 1rem;
+                transform: translateY(-50%);
+                width: 45%;
+                padding-right: 10px;
+                white-space: nowrap;
+                text-align: left;
+                font-weight: 600;
+                content: attr(data-label);
+            }
+            
+            .responsive-table td:last-child {
+                border-bottom: 0;
+            }
+
+            .responsive-table tfoot th, .responsive-table tfoot td {
+                display: inline;
+                border: none;
+                padding: 0;
+                text-align: left;
+            }
+            .responsive-table tfoot th {
+                 font-size: 1.125rem;
+            }
+            .responsive-table tfoot td:nth-of-type(2) {
+                font-size: 1.25rem;
+                font-weight: bold;
+            }
+            .responsive-table tfoot td:nth-of-type(1),
+            .responsive-table tfoot td:nth-of-type(3) {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <div class="h5-size font-bold">
+                <span class="brand-text">Pixel Marketing</span> for <span class="text-gray-700">죽이야기</span>
+            </div>
+            <div class="hidden md:flex space-x-8 h6-size">
+                <a href="#section-status" class="nav-link pb-1">현황 및 목표</a>
+                <a href="#section-analysis" class="nav-link pb-1">시장 분석</a>
+                <a href="#section-competitor" class="nav-link pb-1">경쟁사 비교</a>
+                <a href="#section-strategy" class="nav-link pb-1">마케팅 제안</a>
+                <a href="#section-schedule" class="nav-link pb-1">실행 스케줄</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+        <section id="section-hero" class="text-center py-16 md:py-24">
+            <h1 class="h1-size leading-tight mb-4">죽이야기 '짜먹는 죽'</h1>
+            <h2 class="h3-size text-gray-600">추석 시즌 집중 공략을 통한 매출 상승 전략 제안</h2>
+            <p class="mt-6 text-gray-500">Presented by 픽셀마케팅</p>
+        </section>
+
+        <section id="section-status" class="py-16">
+            <h2 class="section-title">0. 현황 및 목표</h2>
+            <p class="mt-8 text-lg text-gray-700">본격적인 제안에 앞서, 현재 '짜먹는 죽'의 비즈니스 현황과 목표를 공유합니다.</p>
+            <div class="mt-12 grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="h4-size font-bold mb-3 brand-text">제품 구성</h3>
+                    <p class="h6-size text-gray-600"><strong>간식용 짜죽:</strong> 6종 (140g)</p>
+                    <p class="h6-size text-gray-600"><strong>검진용 건강죽:</strong> 2종 (170g)</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="h4-size font-bold mb-3 brand-text">현재 판매 현황</h3>
+                    <p class="h6-size text-gray-600"><strong>월 10만 개</strong> 판매</p>
+                    <p class="h6-size text-gray-600">(월 매출 약 1억 원)</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="h4-size font-bold mb-3 brand-text">성장 목표 (2026년)</h3>
+                    <p class="h6-size text-gray-600"><strong>월 100만 개</strong> 판매</p>
+                    <p class="h6-size text-gray-600">(월 매출 약 10억 원)</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="h4-size font-bold mb-3 brand-text">판매 채널</h3>
+                    <p class="h6-size text-gray-600"><strong>현재:</strong> 쿠팡, 약국, 건강검진센터</p>
+                    <p class="h6-size text-gray-600"><strong>목표:</strong> 편의점, H&B스토어, 자사몰</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="section-analysis" class="py-16">
+            <h2 class="section-title">1. 시장 분석: 비어있는 왕좌, 기회는 바로 지금입니다</h2>
+            <p class="mt-8 text-lg text-gray-700">과거 시장의 유력 경쟁자였던 본죽 '밀타임'의 실패는 죽이야기에게 독점적 시장 기회를 열어주었습니다.<br>그들의 실패 원인을 분석함으로써, 우리는 '짜먹는 죽'의 성공 공식을 명확히 할 수 있습니다.</p>
+            <div class="mt-12 grid md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-md border-l-4 brand-border">
+                    <h3 class="h4-size font-bold mb-3">정체성의 함정</h3>
+                    <p class="h6-size text-gray-600">'든든한 식사'라는 브랜드 정체성과 '가벼운 간식'이라는 제품 포지셔닝의 충돌로, 기존 고객과 신규 고객 모두를 놓쳤습니다.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md border-l-4 brand-border">
+                    <h3 class="h4-size font-bold mb-3">전략적 우선순위 부재</h3>
+                    <p class="h6-size text-gray-600">제품 자체의 성공보다 자사몰 회원 유치를 위한 '미끼 상품'으로 활용되어 지속적인 마케팅 투자가 이루어지지 않았습니다.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md border-l-4 brand-border">
+                    <h3 class="h4-size font-bold mb-3">일회성 마케팅</h3>
+                    <p class="h6-size text-gray-600">출시 초기 홍보에만 집중했을 뿐, 소비자와의 관계를 형성하고 유기적인 입소문을 만들어낼 후속 마케팅이 전무했습니다.</p>
+                </div>
+            </div>
+            <div class="mt-12 bg-[#E8EAE3] p-6 rounded-lg text-center">
+                <p class="h5-size font-bold brand-text">결론: 본죽의 철수로 인해 '짜먹는 죽'은 현재 시장 내 유일한 플레이어로서, 카테고리를 선점하고 시장을 장악할 절호의 기회를 맞이했습니다.</p>
+            </div>
+        </section>
+
+        <section id="section-competitor" class="py-16">
+            <h2 class="section-title">2. 경쟁사 비교: 성공과 실패에서 배우는 전략</h2>
+            <p class="mt-8 text-lg text-gray-700">'짜먹는 죽'의 현재 위치를 진단하고 나아갈 방향을 설정하기 위해, 실패 사례인 '본죽 밀타임'과 성공 사례인 '쉐이크베이비'를 비교 분석했습니다.</p>
+            
+            <div class="mt-12 bg-white p-6 md:p-8 rounded-lg shadow-lg">
+                <h3 class="h4-size font-bold text-center mb-6">주요 경쟁 제품 정량 분석</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm text-left">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="p-3">구분</th>
+                                <th class="p-3 font-bold brand-text">죽이야기 짜먹는죽</th>
+                                <th class="p-3">본죽 밀타임 (단종)</th>
+                                <th class="p-3">쉐이크베이비</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y">
+                            <tr>
+                                <td class="p-3 font-semibold">대표 제품</td>
+                                <td class="p-3">짜먹는죽 6종</td>
+                                <td class="p-3">군고구마죽, 밤라떼죽</td>
+                                <td class="p-3">락토컷 단백질 쉐이크 딸기맛</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-semibold">용량</td>
+                                <td class="p-3">140g</td>
+                                <td class="p-3">130g</td>
+                                <td class="p-3">750g (약 25회분)</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-semibold">가격 (1회분 기준)</td>
+                                <td class="p-3">약 1,000원</td>
+                                <td class="p-3">2,200원</td>
+                                <td class="p-3">약 1,200원</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-semibold">주요 판매지표</td>
+                                <td class="p-3">쿠팡 월 10만개 판매</td>
+                                <td class="p-3">-</td>
+                                <td class="p-3">쿠팡 리뷰 50,000+</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mt-12 bg-white p-6 md:p-8 rounded-lg shadow-lg">
+                <h3 class="h4-size font-bold text-center mb-6">브랜드 포지셔닝 정성 분석</h3>
+                <div class="chart-container">
+                    <canvas id="competitorChart"></canvas>
+                </div>
+                <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 text-center text-sm">
+                    <div class="flex items-center justify-center"><span class="w-4 h-4 rounded-full inline-block mr-2" style="background-color: #455A21;"></span>죽이야기 (현재)</div>
+                    <div class="flex items-center justify-center"><span class="w-4 h-4 rounded-full inline-block mr-2" style="background-color: #FFB400;"></span>본죽 밀타임 (과거)</div>
+                    <div class="flex items-center justify-center"><span class="w-4 h-4 rounded-full inline-block mr-2" style="background-color: #5B86E5;"></span>쉐이크베이비 (성공사례)</div>
+                </div>
+                <div class="mt-12 border-t pt-8">
+                    <h3 class="h4-size font-bold text-center mb-6">그래프 분석 및 시사점</h3>
+                    <div class="grid md:grid-cols-3 gap-8 text-left">
+                        <div>
+                            <h4 class="h5-size font-semibold flex items-center"><span class="w-3 h-3 rounded-full inline-block mr-2" style="background-color: #455A21;"></span>죽이야기</h4>
+                            <p class="mt-2 text-sm text-gray-600"><strong>강점:</strong> '죽'이라는 카테고리에서 오는 높은 '브랜드 가치'와 신뢰도가 가장 큰 자산입니다.<br><strong>약점:</strong> 약국, 선물 등 한정된 '채널 접근성'과 '맛/제품력', '라이프스타일 제안' 측면에서 현대적 소비자 트렌드를 따라가지 못하고 있습니다.</p>
+                        </div>
+                        <div>
+                            <h4 class="h5-size font-semibold flex items-center"><span class="w-3 h-3 rounded-full inline-block mr-2" style="background-color: #FFB400;"></span>본죽 밀타임</h4>
+                            <p class="mt-2 text-sm text-gray-600"><strong>강점:</strong> 본죽의 후광으로 '브랜드 가치'와 편의점 입점을 통한 '채널 접근성'이 높았습니다.<br><strong>약점:</strong> '타겟 명확성'이 모호했고, 간식으로 포지셔닝하며 '라이프스타일 제안'에 실패해 결국 시장에서 외면받았습니다.</p>
+                        </div>
+                        <div>
+                            <h4 class="h5-size font-semibold flex items-center"><span class="w-3 h-3 rounded-full inline-block mr-2" style="background-color: #5B86E5;"></span>쉐이크베이비</h4>
+                            <p class="mt-2 text-sm text-gray-600"><strong>강점:</strong> 압도적인 '맛/제품력'과 '라이프스타일 제안'으로 시장을 장악했습니다. H&B스토어 중심의 '채널 접근성'과 명확한 '타겟 설정'이 성공의 핵심입니다.<br><strong>약점:</strong> 상대적으로 '브랜드 가치'의 깊이는 아직 전통 브랜드에 비해 얕을 수 있습니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+             <div class="mt-12 bg-[#E8EAE3] p-6 rounded-lg text-center">
+                <p class="h5-size font-bold brand-text" style="line-height: 1.8;">분석 결론: '짜먹는 죽'은 '신뢰'라는 자산을 가졌지만, 시장 확대를 위해서는 쉐이크베이비처럼<br>①압도적인 맛의 혁신<br>②일상 속 핵심 채널 장악<br>③'즐거운 자기관리'라는 라이프스타일 메시지 전달이 시급합니다.</p>
+            </div>
+        </section>
+
+        <section id="section-strategy" class="py-16">
+            <h2 class="section-title">3. 2025 추석 시즌 마케팅 실행 제안</h2>
+            <p class="mt-8 text-lg text-gray-700">시장 분석을 바탕으로, 단기 매출을 극대화할 수 있는 추석 선물 시장을 집중 공략하는 3단계 실행 패키지를 제안합니다. 모든 패키지는 구매 전환율이 높은 카페 침투와 블로그 여론 형성을 기본으로 하며, 예산에 따라 파급력을 더하는 구조입니다.</p>
+            <p class="text-gray-600 mt-2">※ 인플루언서 마케팅은 변동성이 커, 모든 패키지에서 별도 협의 후 추가하는 항목입니다.</p>
+
+            <div class="mt-12">
+                <div class="flex flex-col sm:flex-row border-b">
+                    <button data-plan="basic" class="plan-tab w-full sm:flex-1 p-4 h5-size font-bold text-gray-600 active">💰 BASIC</button>
+                    <button data-plan="premium" class="plan-tab w-full sm:flex-1 p-4 h5-size font-bold text-gray-600">🚀 PREMIUM</button>
+                    <button data-plan="platinum" class="plan-tab w-full sm:flex-1 p-4 h5-size font-bold text-gray-600">👑 PLATINUM</button>
+                </div>
+
+                <div id="plan-details" class="mt-8 bg-white md:rounded-lg md:shadow-lg overflow-hidden">
+                    <!-- Plan content will be injected here by JS -->
+                </div>
+            </div>
+        </section>
+
+        <section id="section-schedule" class="py-16">
+            <h2 class="section-title">4. 5주 집중 실행 스케줄</h2>
+            <p class="mt-8 text-lg text-gray-700">추석 배송 마감일(9월 마지막 주)에 맞춰 주문을 극대화하기 위한 5주간의 체계적인 실행 로드맵입니다.</p>
+            <div class="mt-12 flex flex-col md:flex-row justify-between space-y-4 md:space-y-0 md:space-x-2">
+                <div class="flex-1 bg-white p-4 rounded-lg shadow text-center border-t-4 brand-border">
+                    <p class="font-bold text-gray-500 text-sm">1주차 (8/25~)</p>
+                    <p class="h5-size mt-2">준비 및 기획</p>
+                    <p class="text-gray-600 text-sm mt-1">콘텐츠 기획 및 섭외</p>
+                </div>
+                <div class="flex items-center justify-center text-gray-300 text-2xl hidden md:block">→</div>
+                <div class="flex-1 bg-white p-4 rounded-lg shadow text-center border-t-4 brand-border">
+                    <p class="font-bold text-gray-500 text-sm">2주차 (9/1~)</p>
+                    <p class="h5-size mt-2">1차 콘텐츠 배포</p>
+                    <p class="text-gray-600 text-sm mt-1">초기 관심도 형성</p>
+                </div>
+                <div class="flex items-center justify-center text-gray-300 text-2xl hidden md:block">→</div>
+                <div class="flex-1 bg-white p-4 rounded-lg shadow text-center border-t-4 brand-border">
+                    <p class="font-bold text-gray-500 text-sm">3주차 (9/8~)</p>
+                    <p class="h5-size mt-2">핵심 콘텐츠 확산</p>
+                    <p class="text-gray-600 text-sm mt-1">신뢰도 및 매력도 상승</p>
+                </div>
+                <div class="flex items-center justify-center text-gray-300 text-2xl hidden md:block">→</div>
+                <div class="flex-1 bg-white p-4 rounded-lg shadow text-center border-t-4 brand-border">
+                    <p class="font-bold text-gray-500 text-sm">4주차 (9/15~)</p>
+                    <p class="h5-size mt-2">집중 노출</p>
+                    <p class="text-gray-600 text-sm mt-1">'대세감' 형성</p>
+                </div>
+                <div class="flex items-center justify-center text-gray-300 text-2xl hidden md:block">→</div>
+                <div class="flex-1 bg-white p-4 rounded-lg shadow text-center border-t-4 border-red-500">
+                    <p class="font-bold text-red-500 text-sm">5주차 (9/22~)</p>
+                    <p class="h5-size mt-2">전환 극대화</p>
+                    <p class="text-gray-600 text-sm mt-1">최대 매출 달성</p>
+                </div>
+            </div>
+        </section>
+        
+        <footer class="text-center py-12 border-t mt-16">
+            <p class="h4-size font-bold">성공적인 캠페인을 약속합니다.</p>
+            <p class="mt-4 text-gray-600">죽이야기의 성장을 함께할 파트너, 픽셀마케팅</p>
+        </footer>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const plans = {
+                basic: {
+                    title: '💰 BASIC (실속형) 패키지: 300만원 + α',
+                    strategy: "핵심 타겟이 모인 카페에 여론을 형성하고, 양질의 블로그 콘텐츠(최블, 인기글)와 다수의 일반 배포를 통해 검색 결과의 기반을 다지는 가장 효율적인 패키지입니다.",
+                    items: [
+                        { name: '네이버 카페 침투', quantity: '30건', cost: '1,500,000원', detail: '맘스홀릭 등 대형 맘카페, 지역 맘카페' },
+                        { name: '블로그 배포 (일반)', quantity: '200건', cost: '500,000원', detail: "'추석선물' 연관 키워드 검색량 확보" },
+                        { name: '블로그 (인기글)', quantity: '5건', cost: '750,000원', detail: 'VIEW탭 상위 노출로 주목도 상승' },
+                        { name: '블로그 (최적화)', quantity: '5건', cost: '250,000원', detail: '최적화 블로그를 통한 신뢰도 높은 후기' }
+                    ]
+                },
+                premium: {
+                    title: '🚀 PREMIUM (성과형) 패키지: 500만원 + α',
+                    strategy: "BASIC 패키지의 모든 항목을 강화하고 언론보도를 추가하여, 검색 결과의 양과 질 모두에서 경쟁 우위를 점하고 구매 전환율을 극대화합니다.",
+                    items: [
+                        { name: '네이버 카페 침투', quantity: '40건', cost: '2,000,000원', detail: '질문/답변, 후기 등 다양한 형태로 침투' },
+                        { name: '블로그 배포 (일반)', quantity: '300건', cost: '750,000원', detail: '연관 키워드 검색 결과 장악' },
+                        { name: '블로그 (인기글)', quantity: '8건', cost: '1,200,000원', detail: '핵심 키워드 VIEW탭 상위 노출 점유' },
+                        { name: '블로그 (최적화)', quantity: '10건', cost: '500,000원', detail: '다수의 신뢰도 높은 후기로 구매 확신' },
+                        { name: '언론보도 송출', quantity: '3건', cost: '550,000원', detail: '제품 특장점 강조 기사로 공신력 확보' }
+                    ]
+                },
+                platinum: {
+                    title: '👑 PLATINUM (지배형) 패키지: 1,000만원 + α',
+                    strategy: "모든 채널의 물량을 압도적으로 집행하여 단기간에 '추석 선물' 관련 검색 결과를 장악하고, 잠재고객의 구매 고려군에서 경쟁사를 완전히 배제시키는 전략입니다.",
+                    items: [
+                        { name: '네이버 카페 침투', quantity: '80건', cost: '4,000,000원', detail: "'짜죽 선물 후기' 등 2차 바이럴 콘텐츠 생성" },
+                        { name: '블로그 배포 (일반)', quantity: '500건', cost: '1,250,000원', detail: '세부 키워드까지 완벽하게 장악' },
+                        { name: '블로그 (인기글)', quantity: '20건', cost: '3,000,000원', detail: '다수의 핵심 키워드 VIEW탭 상위 독점' },
+                        { name: '블로그 (최적화)', quantity: '20건', cost: '1,000,000원', detail: "압도적인 후기 수량으로 '대세감' 형성" },
+                        { name: '언론보도 송출', quantity: '5건', cost: '750,000원', detail: '기획 기사 포함, 신뢰도 높은 정보로 포지셔닝' }
+                    ]
+                }
+            };
+
+            const planDetailsContainer = document.getElementById('plan-details');
+            const planTabs = document.querySelectorAll('.plan-tab');
+
+            function renderPlan(planName) {
+                const plan = plans[planName];
+                let totalCost = 0;
+                plan.items.forEach(item => {
+                    totalCost += parseInt(item.cost.replace(/,/g, '').replace('원', ''));
+                });
+
+                let html = `
+                    <div class="p-6 md:p-8">
+                        <h3 class="h4-size font-bold brand-text">${plan.title}</h3>
+                        <p class="mt-3 text-gray-600">${plan.strategy}</p>
+                        <div class="mt-6 flow-root">
+                            <div class="responsive-table -mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                                <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" class="py-3.5 pl-4 pr-3 text-left h6-size font-semibold text-gray-900 sm:pl-0">서비스 항목</th>
+                                                <th scope="col" class="px-3 py-3.5 text-left h6-size font-semibold text-gray-900">수량</th>
+                                                <th scope="col" class="px-3 py-3.5 text-left h6-size font-semibold text-gray-900">대행가 (VAT 별도)</th>
+                                                <th scope="col" class="px-3 py-3.5 text-left h6-size font-semibold text-gray-900">세부 내용</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-gray-200 bg-white">
+                `;
+                plan.items.forEach(item => {
+                    html += `
+                        <tr>
+                            <td data-label="서비스 항목" class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">${item.name}</td>
+                            <td data-label="수량" class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">${item.quantity}</td>
+                            <td data-label="대행가" class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">${item.cost}</td>
+                            <td data-label="세부 내용" class="px-3 py-4 text-sm text-gray-500">${item.detail}</td>
+                        </tr>
+                    `;
+                });
+                html += `
+                                        </tbody>
+                                        <tfoot>
+                                            <tr class="border-t-2 border-gray-300">
+                                                <th scope="row" class="py-4 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">총합</th>
+                                                <td data-label=""></td>
+                                                <td data-label="총합" class="px-3 py-4 text-sm font-semibold text-gray-900">${totalCost.toLocaleString()}원</td>
+                                                <td data-label=""></td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                planDetailsContainer.innerHTML = html;
+            }
+
+            planTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    planTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    renderPlan(tab.dataset.plan);
+                });
+            });
+
+            renderPlan('basic');
+
+            const ctx = document.getElementById('competitorChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['맛/제품력', '채널 접근성', '브랜드 가치', '타겟 명확성', '라이프스타일 제안'],
+                    datasets: [{
+                        label: '죽이야기 (현재)',
+                        data: [3, 2, 4, 3, 2],
+                        backgroundColor: 'rgba(69, 90, 33, 0.2)',
+                        borderColor: '#455A21',
+                        pointBackgroundColor: '#455A21',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#455A21',
+                        borderWidth: 2
+                    }, {
+                        label: '본죽 밀타임 (과거)',
+                        data: [3, 4, 4, 2, 1],
+                        backgroundColor: 'rgba(255, 180, 0, 0.2)',
+                        borderColor: '#FFB400',
+                        pointBackgroundColor: '#FFB400',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#FFB400',
+                        borderWidth: 2
+                    }, {
+                        label: '쉐이크베이비 (성공사례)',
+                        data: [5, 5, 3, 5, 5],
+                        backgroundColor: 'rgba(91, 134, 229, 0.2)',
+                        borderColor: '#5B86E5',
+                        pointBackgroundColor: '#5B86E5',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#5B86E5',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                            grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                            pointLabels: {
+                                font: { size: 14, family: 'SUIT-Regular' },
+                                color: '#333'
+                            },
+                            ticks: {
+                                backdropColor: 'rgba(255, 255, 255, 0.75)',
+                                color: '#666',
+                                stepSize: 1
+                            },
+                            min: 0,
+                            max: 5
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+            
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetElement = document.querySelector(this.getAttribute('href'));
+                    if (targetElement) {
+                         window.scrollTo({
+                            top: targetElement.offsetTop - 80, // Adjust for sticky header
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+```
+
+I have edited the document. I've modified the HTML and JavaScript to improve the mobile readability of the proposal section. On smaller screens, the table will now transform into a more user-friendly card-based layout. I also adjusted the plan tabs to stack vertically on mobile for better usability.
+네, 후PD님. 대표님께서 모바일로 보실 때 제안서 부분이 불편하시지 않도록, 모바일 환경에 최적화된 디자인으로 가독성을 대폭 개선했습니다.
+
+데스크톱에서는 기존의 표 형식을 유지하여 한눈에 비교하기 쉽도록 하고, **모바일 화면에서는 각 항목이 보기 편한 카드 형태로 자동 전환**되도록 코드를 수정했습니다. 이제 어떤 기기에서 보시든 최적의 화면으로 보고서를 확인하실 수 있습니다.
+
+수정된 최종 버전을 Canvas에 반영했습니다.
+
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>죽이야기 '짜먹는 죽' 매출 상승 전략 제안 | 픽셀마케팅</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Juk Story Green -->
+    <!-- Application Structure Plan: A single-page, top-down narrative report designed for executive review. It uses a sticky navigation bar for easy access to key sections. The flow is logical: outlining current status & goals, identifying a market opportunity (competitor failure), analyzing benchmarks (competitor comparison), focusing on a specific, timely event (Chuseok), and presenting a clear, tiered solution (interactive marketing plans) with a timeline. This structure was chosen to build a persuasive argument step-by-step, leading the user from 'why' to 'what' and 'how', making the final proposal a logical conclusion of the analysis. Interactivity is focused on the core decision-making area (comparing plans) to maintain clarity. -->
+    <!-- Visualization & Content Choices: 1. Status & Goals -> Goal: Provide Context -> Presentation: Thematic cards (HTML/CSS) -> Justification: Quick, digestible overview of key business metrics. 2. Competitor Analysis -> Goal: Compare & Justify Strategy -> Viz: Comparison Table + Radar Chart (Chart.js/Canvas) -> Justification: The table provides hard data (price, volume), while the radar chart offers a multi-axial qualitative view of brand positioning, showing strengths and weaknesses. 3. Marketing Plans -> Goal: Present Options & Costs -> Presentation: Interactive Tabs/Tables (HTML/CSS/JS) -> Interaction: User clicks tab to reveal details of each plan -> Justification: Tabs are a standard, intuitive UI pattern for comparing options without cluttering the page. Mobile view refactors the table into a card list for readability. 4. Timeline -> Goal: Show Execution Plan -> Viz: Horizontal Timeline (HTML/CSS Flexbox) -> Justification: A simple visual timeline is the clearest way to present a chronological plan. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         @font-face {
@@ -100,7 +685,6 @@
                 <a href="#section-status" class="nav-link pb-1">현황 및 목표</a>
                 <a href="#section-analysis" class="nav-link pb-1">시장 분석</a>
                 <a href="#section-competitor" class="nav-link pb-1">경쟁사 비교</a>
-                <a href="#section-landingpage" class="nav-link pb-1">랜딩페이지 제안</a>
                 <a href="#section-strategy" class="nav-link pb-1">마케팅 제안</a>
                 <a href="#section-schedule" class="nav-link pb-1">실행 스케줄</a>
             </div>
@@ -120,8 +704,8 @@
             <div class="mt-12 grid md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <div class="bg-white p-6 rounded-lg shadow-md">
                     <h3 class="h4-size font-bold mb-3 brand-text">제품 구성</h3>
-                    <p class="h6-size text-gray-600"><strong>짜먹는 죽 (단품):</strong> 2,600원<br>(용량 140g, 170g)</p>
-                    <p class="h6-size text-gray-600"><strong>선물세트 (12개입):</strong> 26,000원<br>(정상가 40,000원)</p>
+                    <p class="h6-size text-gray-600"><strong>간식용 짜죽:</strong> 6종 (140g)</p>
+                    <p class="h6-size text-gray-600"><strong>검진용 건강죽:</strong> 2종 (170g)</p>
                 </div>
                 <div class="bg-white p-6 rounded-lg shadow-md">
                     <h3 class="h4-size font-bold mb-3 brand-text">현재 판매 현황</h3>
@@ -182,19 +766,19 @@
                         <tbody class="divide-y">
                             <tr>
                                 <td class="p-3 font-semibold">대표 제품</td>
-                                <td class="p-3">짜먹는죽 8종</td>
+                                <td class="p-3">짜먹는죽 6종</td>
                                 <td class="p-3">군고구마죽, 밤라떼죽</td>
                                 <td class="p-3">락토컷 단백질 쉐이크 딸기맛</td>
                             </tr>
                             <tr>
                                 <td class="p-3 font-semibold">용량</td>
-                                <td class="p-3">140g / 170g</td>
+                                <td class="p-3">140g</td>
                                 <td class="p-3">130g</td>
                                 <td class="p-3">750g (약 25회분)</td>
                             </tr>
                             <tr>
                                 <td class="p-3 font-semibold">가격 (1회분 기준)</td>
-                                <td class="p-3">약 2,600원</td>
+                                <td class="p-3">약 1,000원</td>
                                 <td class="p-3">2,200원</td>
                                 <td class="p-3">약 1,200원</td>
                             </tr>
@@ -242,37 +826,11 @@
             </div>
         </section>
 
-        <section id="section-landingpage" class="py-16">
-            <h2 class="section-title">3. 구매 전환율 상승을 위한 랜딩페이지 제작</h2>
-            <p class="mt-8 text-lg text-gray-700">성공적인 마케팅 캠페인을 위해서는 흩어져 있는 광고 트래픽을 한곳에 모아 구매로 전환시킬 **'핵심 기지'**가 필요합니다. 쿠팡 상세페이지와는 별개로, 오직 '짜먹는 죽 선물세트'만을 위한 판매 전문 랜딩페이지 제작을 제안합니다.</p>
-            <div class="mt-12 grid md:grid-cols-2 gap-8 items-center">
-                <div class="bg-white p-6 rounded-lg shadow-md">
-                    <h3 class="h4-size font-bold mb-3 brand-text">랜딩페이지의 필요성</h3>
-                    <ul class="list-disc list-inside text-gray-600 space-y-2">
-                        <li><strong>전환율 극대화:</strong> 불필요한 정보 없이 오직 구매 설득에만 집중하여 이탈을 방지합니다.</li>
-                        <li><strong>정확한 데이터 측정:</strong> 캠페인 성과(유입, 전환율 등)를 정확하게 측정하고 분석하여 향후 전략을 고도화합니다.</li>
-                        <li><strong>통일된 메시지 전달:</strong> 모든 광고 채널에서 유입된 고객에게 일관된 브랜드 경험과 프로모션 정보를 제공합니다.</li>
-                    </ul>
-                    <a href="#" class="inline-block brand-bg text-white font-bold py-2 px-4 rounded-lg mt-6 hover:opacity-90 transition-opacity">랜딩페이지 기획서 (첨부)</a>
-                </div>
-                <div>
-                     <h3 class="h4-size font-bold mb-4 text-center md:text-left">기존 상세페이지 포트폴리오</h3>
-                     <div class="grid grid-cols-3 gap-4">
-                        <img src="https://placehold.co/300x900/E8EAE3/455A21?text=Portfolio+1" alt="Portfolio 1" class="rounded-lg shadow-lg w-full h-auto">
-                        <img src="https://placehold.co/300x900/E8EAE3/455A21?text=Portfolio+2" alt="Portfolio 2" class="rounded-lg shadow-lg w-full h-auto">
-                        <img src="https://placehold.co/300x900/E8EAE3/455A21?text=Portfolio+3" alt="Portfolio 3" class="rounded-lg shadow-lg w-full h-auto">
-                     </div>
-                     <div class="text-center mt-4">
-                        <a href="#" class="text-gray-600 hover:brand-text font-semibold">포트폴리오 더보기 →</a>
-                     </div>
-                </div>
-            </div>
-        </section>
-
         <section id="section-strategy" class="py-16">
-            <h2 class="section-title">4. 2025 추석 시즌 마케팅 실행 제안</h2>
+            <h2 class="section-title">3. 2025 추석 시즌 마케팅 실행 제안</h2>
             <p class="mt-8 text-lg text-gray-700">시장 분석을 바탕으로, 단기 매출을 극대화할 수 있는 추석 선물 시장을 집중 공략하는 3단계 실행 패키지를 제안합니다. 모든 패키지는 구매 전환율이 높은 카페 침투와 블로그 여론 형성을 기본으로 하며, 예산에 따라 파급력을 더하는 구조입니다.</p>
-            
+            <p class="text-gray-600 mt-2">※ 인플루언서 마케팅은 변동성이 커, 모든 패키지에서 별도 협의 후 추가하는 항목입니다.</p>
+
             <div class="mt-12">
                 <div class="flex flex-col sm:flex-row border-b">
                     <button data-plan="basic" class="plan-tab flex-1 p-3 sm:p-4 h5-size font-bold text-gray-600 active">💰 BASIC</button>
@@ -280,14 +838,14 @@
                     <button data-plan="platinum" class="plan-tab flex-1 p-3 sm:p-4 h5-size font-bold text-gray-600">👑 PLATINUM</button>
                 </div>
 
-                <div id="plan-details" class="mt-8 bg-white md:rounded-lg md:shadow-lg overflow-hidden">
+                <div id="plan-details" class="mt-8 bg-white rounded-lg shadow-lg overflow-hidden">
                     <!-- Plan content will be injected here by JS -->
                 </div>
             </div>
         </section>
 
         <section id="section-schedule" class="py-16">
-            <h2 class="section-title">5. 5주 집중 실행 스케줄</h2>
+            <h2 class="section-title">4. 5주 집중 실행 스케줄</h2>
             <p class="mt-8 text-lg text-gray-700">추석 배송 마감일(9월 마지막 주)에 맞춰 주문을 극대화하기 위한 5주간의 체계적인 실행 로드맵입니다.</p>
             <div class="mt-12 flex flex-col md:flex-row justify-between space-y-4 md:space-y-0 md:space-x-2">
                 <div class="flex-1 bg-white p-4 rounded-lg shadow text-center border-t-4 brand-border">
@@ -333,39 +891,35 @@
         document.addEventListener('DOMContentLoaded', function() {
             const plans = {
                 basic: {
-                    title: '💰 BASIC (실속형) 패키지: 3,350,000원',
-                    strategy: "브랜드 인지도 확산과 초기 고객 확보를 위한 필수적인 마케팅 활동을 중심으로 구성된 패키지입니다.",
+                    title: '💰 BASIC (실속형) 패키지: 300만원 + α',
+                    strategy: "핵심 타겟이 모인 카페에 여론을 형성하고, 양질의 블로그 콘텐츠(최블, 인기글)와 다수의 일반 배포를 통해 검색 결과의 기반을 다지는 가장 효율적인 패키지입니다.",
                     items: [
-                        { name: '공식블로그', quantity: '월 4회', cost: '600,000원', detail: '주 1회 포스팅' },
-                        { name: '카페바이럴', quantity: '7건', cost: '350,000원', detail: '타겟 커뮤니티 여론 형성' },
-                        { name: '블로그 체험단', quantity: '10건', cost: '200,000원', detail: '실사용자 후기 확보' },
-                        { name: '인스타 체험단', quantity: '10건', cost: '700,000원', detail: '비주얼 콘텐츠 확산' },
-                        { name: '스레드+블로그 연동 운영', quantity: '4회', cost: '1,200,000원', detail: '최신 트렌드 채널 활용' },
-                        { name: '숏폼 콘텐츠 제작', quantity: '1편', cost: '300,000원', detail: '바이럴 영상 콘텐츠 제작' }
+                        { name: '네이버 카페 침투', quantity: '30건', cost: '1,500,000원', detail: '맘스홀릭 등 대형 맘카페, 지역 맘카페' },
+                        { name: '블로그 배포 (일반)', quantity: '200건', cost: '500,000원', detail: "'추석선물' 연관 키워드 검색량 확보" },
+                        { name: '블로그 (인기글)', quantity: '5건', cost: '750,000원', detail: 'VIEW탭 상위 노출로 주목도 상승' },
+                        { name: '블로그 (최적화)', quantity: '5건', cost: '250,000원', detail: '최적화 블로그를 통한 신뢰도 높은 후기' }
                     ]
                 },
                 premium: {
-                    title: '🚀 PREMIUM (성과형) 패키지: 5,800,000원',
-                    strategy: "BASIC 패키지의 실행 물량을 늘려 노출을 극대화하고, 시장 내 인지도를 빠르게 끌어올리는 데 집중하는 패키지입니다.",
+                    title: '🚀 PREMIUM (성과형) 패키지: 500만원 + α',
+                    strategy: "BASIC 패키지의 모든 항목을 강화하고 언론보도를 추가하여, 검색 결과의 양과 질 모두에서 경쟁 우위를 점하고 구매 전환율을 극대화합니다.",
                     items: [
-                        { name: '공식블로그', quantity: '월 8회', cost: '1,200,000원', detail: '주 2회 포스팅' },
-                        { name: '카페바이럴', quantity: '15건', cost: '750,000원', detail: '타겟 커뮤니티 여론 장악' },
-                        { name: '블로그 체험단', quantity: '20건', cost: '400,000원', detail: '다수의 실사용자 후기 확보' },
-                        { name: '인스타 체험단', quantity: '20건', cost: '1,400,000원', detail: '비주얼 콘텐츠 대량 확산' },
-                        { name: '스레드+블로그 연동 운영', quantity: '8회', cost: '1,750,000원', detail: '채널 영향력 강화' },
-                        { name: '숏폼 콘텐츠 제작', quantity: '2편', cost: '300,000원', detail: '바이럴 영상 시리즈 제작' }
+                        { name: '네이버 카페 침투', quantity: '40건', cost: '2,000,000원', detail: '질문/답변, 후기 등 다양한 형태로 침투' },
+                        { name: '블로그 배포 (일반)', quantity: '300건', cost: '750,000원', detail: '연관 키워드 검색 결과 장악' },
+                        { name: '블로그 (인기글)', quantity: '8건', cost: '1,200,000원', detail: '핵심 키워드 VIEW탭 상위 노출 점유' },
+                        { name: '블로그 (최적화)', quantity: '10건', cost: '500,000원', detail: '다수의 신뢰도 높은 후기로 구매 확신' },
+                        { name: '언론보도 송출', quantity: '3건', cost: '550,000원', detail: '제품 특장점 강조 기사로 공신력 확보' }
                     ]
                 },
                 platinum: {
-                    title: '👑 PLATINUM (지배형) 패키지: 10,150,000원',
-                    strategy: "모든 채널의 물량을 압도적으로 집행하여 단기간에 시장을 장악하고, 잠재고객의 구매 고려군에서 앞서나갈 수 있는 전략입니다.",
+                    title: '👑 PLATINUM (지배형) 패키지: 1,000만원 + α',
+                    strategy: "모든 채널의 물량을 압도적으로 집행하여 단기간에 '추석 선물' 관련 검색 결과를 장악하고, 잠재고객의 구매 고려군에서 경쟁사를 완전히 배제시키는 전략입니다.",
                     items: [
-                        { name: '공식블로그', quantity: '월 12회', cost: '1,800,000원', detail: '주 3회 포스팅' },
-                        { name: '카페바이럴', quantity: '30건', cost: '1,500,000원', detail: '커뮤니티 내 압도적 여론 형성' },
-                        { name: '블로그 체험단', quantity: '40건', cost: '800,000원', detail: '신뢰도 높은 후기 대량 확보' },
-                        { name: '인스타 체험단', quantity: '40건', cost: '2,800,000원', detail: '인스타그램 채널 장악' },
-                        { name: '스레드+블로그 연동 운영', quantity: '12회', cost: '2,650,000원', detail: '지속적인 콘텐츠 순환 구조' },
-                        { name: '숏폼 콘텐츠 제작', quantity: '4편', cost: '600,000원', detail: '다양한 컨셉의 영상 제작' }
+                        { name: '네이버 카페 침투', quantity: '80건', cost: '4,000,000원', detail: "'짜죽 선물 후기' 등 2차 바이럴 콘텐츠 생성" },
+                        { name: '블로그 배포 (일반)', quantity: '500건', cost: '1,250,000원', detail: '세부 키워드까지 완벽하게 장악' },
+                        { name: '블로그 (인기글)', quantity: '20건', cost: '3,000,000원', detail: '다수의 핵심 키워드 VIEW탭 상위 독점' },
+                        { name: '블로그 (최적화)', quantity: '20건', cost: '1,000,000원', detail: "압도적인 후기 수량으로 '대세감' 형성" },
+                        { name: '언론보도 송출', quantity: '5건', cost: '750,000원', detail: '기획 기사 포함, 신뢰도 높은 정보로 포지셔닝' }
                     ]
                 }
             };
@@ -380,47 +934,79 @@
                     totalCost += parseInt(item.cost.replace(/,/g, '').replace('원', ''));
                 });
 
+                // Mobile Card View
+                let cardsHtml = '<div class="space-y-4 md:hidden">';
+                plan.items.forEach(item => {
+                    cardsHtml += `
+                        <div class="bg-gray-50 p-4 rounded-lg border">
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-bold text-gray-900 pr-2">${item.name}</h4>
+                                <span class="text-sm font-semibold brand-text whitespace-nowrap">${item.cost}</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-2">${item.detail}</p>
+                            <p class="text-sm text-gray-500 mt-1"><strong>수량:</strong> ${item.quantity}</p>
+                        </div>
+                    `;
+                });
+                cardsHtml += `
+                    <div class="bg-gray-100 p-4 rounded-lg border-t-2 border-gray-300 flex justify-between items-center">
+                        <h4 class="font-bold text-gray-900">총합</h4>
+                        <span class="text-lg font-bold brand-text">${totalCost.toLocaleString()}원</span>
+                    </div>
+                </div>`;
+
+                // Desktop Table View
                 let tableHtml = `
-                    <div class="md:p-8">
-                        <h3 class="h4-size font-bold brand-text px-6 md:px-0 pt-6 md:pt-0">${plan.title}</h3>
-                        <p class="mt-3 text-gray-600 px-6 md:px-0 pb-6 md:pb-0">${plan.strategy}</p>
-                        <div class="mt-6 responsive-table">
-                            <table class="min-w-full">
-                                <thead>
-                                    <tr>
-                                        <th>서비스 항목</th>
-                                        <th>수량</th>
-                                        <th>견적 (VAT 별도)</th>
-                                        <th>비고</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
+                    <div class="flow-root hidden md:block">
+                        <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                            <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col" class="py-3.5 pl-4 pr-3 text-left h6-size font-semibold text-gray-900 sm:pl-0">서비스 항목</th>
+                                            <th scope="col" class="px-3 py-3.5 text-left h6-size font-semibold text-gray-900">수량</th>
+                                            <th scope="col" class="px-3 py-3.5 text-left h6-size font-semibold text-gray-900">대행가 (VAT 별도)</th>
+                                            <th scope="col" class="px-3 py-3.5 text-left h6-size font-semibold text-gray-900">세부 내용</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
                 `;
                 plan.items.forEach(item => {
                     tableHtml += `
                         <tr>
-                            <td data-label="서비스 항목" class="font-medium text-gray-900">${item.name}</td>
-                            <td data-label="수량" class="text-gray-500">${item.quantity}</td>
-                            <td data-label="견적" class="text-gray-500">${item.cost}</td>
-                            <td data-label="비고" class="text-gray-500">${item.detail}</td>
+                            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">${item.name}</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">${item.quantity}</td>
+                            <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">${item.cost}</td>
+                            <td class="px-3 py-4 text-sm text-gray-500">${item.detail}</td>
                         </tr>
                     `;
                 });
                 tableHtml += `
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <th>총합</th>
-                                        <td></td>
-                                        <td>${totalCost.toLocaleString()}원</td>
-                                        <td></td>
-                                    </tr>
-                                </tfoot>
-                            </table>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="border-t-2 border-gray-300">
+                                            <th scope="row" class="py-4 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">총합</th>
+                                            <td class="px-3 py-4 text-sm text-gray-500"></td>
+                                            <td class="px-3 py-4 text-sm font-semibold text-gray-900">${totalCost.toLocaleString()}원</td>
+                                            <td class="px-3 py-4 text-sm text-gray-500"></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 `;
-                planDetailsContainer.innerHTML = tableHtml;
+
+                planDetailsContainer.innerHTML = `
+                    <div class="p-6 md:p-8">
+                        <h3 class="h4-size font-bold brand-text">${plan.title}</h3>
+                        <p class="mt-3 text-gray-600">${plan.strategy}</p>
+                        <div class="mt-6">
+                            ${tableHtml}
+                            ${cardsHtml}
+                        </div>
+                    </div>
+                `;
             }
 
             planTabs.forEach(tab => {
